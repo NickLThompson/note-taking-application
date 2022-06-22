@@ -3,3 +3,5 @@ const uuid = () => {
       .toString(16)
       .substring(1);
   };
+
+module.exports = { uuid };

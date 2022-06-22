@@ -2,7 +2,8 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const PORT = process.env.PORT || 3001;
-const uuid = require("/utils");
+const notes = require ("./db/db.json");
+const { uuid }= require("./utils/utils");
 
 const app = express();
 app.use(express.static("./public"));
@@ -12,19 +13,21 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // get request for all the notes in index.js
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "public/index.html"));
+
+app.get("/api/notes", (req, res) => {
+    console.log(notes)
+    res.json(notes);
 });
 
 app.get("/notes", (req, res) => {
     res.sendFile(path.join(__dirname, "public/notes.html"));
 });
 
-app.get("api/notes", (req, res) => {
-    res.sendFile(path.join(__dirname, "./db/db.json"));
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "public/index.html"));
 });
 
-app.get("api/notes", (req, res) => {
+app.delete("/api/notes/:id", (req, res) => {
     // logging the info request into the terminal
     console.info(`${req.method} request received to get notes`)
 });
@@ -40,14 +43,15 @@ app.post("/api/notes", (req, res) => {
     if (title && text) {
     
     // all objects that will be saved
-    const notes = {
+    const newNotes = {
         title,
         text,
         uuid: uuid(),
     };
 
     // converting the data to a string so it can be saved
-    const savedNotes = JSON.stringify(notes, null, 2);
+    notes.push(newNotes);
+    let savedNotes = JSON.stringify(notes, null, 2);
 
     // taking in the input note title and text (json) and converting it to a string so it can be written to a file
 
@@ -61,13 +65,9 @@ app.post("/api/notes", (req, res) => {
         // response when sent
         const response = {
             status: "success",
-            body: notes
+            body: newNotes
         };
-        console.log(response)
-        res.status(201).json(response);
-    } else {
-            // response when sent
-        res.status(500).json("Error in saving note");
+        res.json(response)
     }
 });
 
